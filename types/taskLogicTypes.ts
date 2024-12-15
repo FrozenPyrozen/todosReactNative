@@ -1,5 +1,3 @@
-import { TASK_REDUCER_TYPES } from '@/constants/taskReducer';
-
 export interface Todo {
   id: number;
   todo: string;
@@ -41,21 +39,35 @@ export type AppState = {
   };
 };
 
+export type LoadingAndErrorStateType =
+  | 'setTasks'
+  | 'addTask'
+  | 'toggleTask'
+  | 'deleteTask'
+  | 'fetchTasks';
+
 export type TaskAction =
-  | { type: TASK_REDUCER_TYPES.ADD_TASK; payload: Task }
-  | { type: TASK_REDUCER_TYPES.FETCH_TASKS; payload: Task[] }
-  | { type: TASK_REDUCER_TYPES.TOGGLE_TASK_COMPLETION; payload: Task['id'] }
-  | { type: TASK_REDUCER_TYPES.DELETE_TASK; payload: Task['id'] }
+  | { type: TASK_REDUCER_ACTION_TYPES.ADD_TASK; payload: Task }
+  | { type: TASK_REDUCER_ACTION_TYPES.FETCH_TASKS; payload: Task[] }
   | {
-      type: TASK_REDUCER_TYPES.SET_LOADING;
-      payload: 'setTasks' | 'addTask' | 'toggleTask' | 'deleteTask';
+      type: TASK_REDUCER_ACTION_TYPES.TOGGLE_TASK_COMPLETION;
+      payload: Task['id'];
+    }
+  | { type: TASK_REDUCER_ACTION_TYPES.DELETE_TASK; payload: Task['id'] }
+  | {
+      type: TASK_REDUCER_ACTION_TYPES.SET_LOADING;
+      payload: LoadingAndErrorStateType;
     }
   | {
-      type: TASK_REDUCER_TYPES.SET_ERROR;
+      type: TASK_REDUCER_ACTION_TYPES.SET_ERROR;
       payload: {
-        key: 'setTasks' | 'addTask' | 'toggleTask' | 'deleteTask';
+        key: LoadingAndErrorStateType;
         error: string;
       };
+    }
+  | {
+      type: TASK_REDUCER_ACTION_TYPES.SET_STATE_FROM_STORAGE;
+      payload: AppState;
     };
 
 export type TaskContextType = {
@@ -66,3 +78,13 @@ export type TaskContextType = {
   deleteTask: (id: Task['id']) => void;
   fetchTasks: () => void;
 };
+
+export enum TASK_REDUCER_ACTION_TYPES {
+  FETCH_TASKS = 'FETCH_TASKS',
+  ADD_TASK = 'ADD_TASK',
+  TOGGLE_TASK_COMPLETION = 'TOGGLE_TASK_COMPLETION',
+  DELETE_TASK = 'DELETE_TASK',
+  SET_STATE_FROM_STORAGE = 'SET_STATE_FROM_STORAGE',
+  SET_LOADING = 'SET_LOADING',
+  SET_ERROR = 'SET_ERROR',
+}

@@ -1,6 +1,6 @@
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { TextProps } from 'react-native';
 import styled from 'styled-components/native';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;

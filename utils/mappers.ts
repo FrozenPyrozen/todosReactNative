@@ -1,4 +1,4 @@
-import { Todo, Task } from '@/types/taskLogicTypes';
+import { Task, Todo } from '@/types/taskLogicTypes';
 
 /**
  * Maps a single Todo (API structure) to a Task (local structure)

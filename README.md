@@ -1,6 +1,14 @@
-# Welcome to your Expo app 👋
+# Overview
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+
+This project is a ToDo application built using React, TypeScript, and Expo. It offers functionalities like adding, deleting, and toggling the completion status of tasks, going to details page, saving tasks between app launches. The app communicates with a dummy API that simulates task management, but the API does not persist changes (e.g., adding, deleting, or toggling tasks) so it manage Task (local structure) and Todo (API structure) and doesn't send local created task to API, to avoid 5xx error. App use react hooks, styled-components and Context to manage state
+
+## Features
+
+- Task Management: Add, delete, and toggle completion status of tasks.
+- State Management: Uses React context to manage app state and tasks globally. All state and tasks managing logic lives in TaskContext
+- Custom Hooks: Reusable hooks like useTasksLogic for task management, and usePersistState for persistence.
 
 ## Get started
 
@@ -35,16 +43,50 @@ npm run reset-project
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-## Learn more
+## Project structure
 
-To learn more about developing your project with Expo, look at the following resources:
+todosReactNative/
+├── .expo # Expo configuration
+├── .vscode # VSCode settings
+├── api/ # API functions and data fetching
+│   └── todosApi.ts # Handles API calls related to todos
+├── app/ # Main application code
+│   ├── screens/ # React Native Screens
+│   │   ├── TaskDetailsScreen/
+│   │   │   └── TaskDetailsScreen.tsx # Screen for displaying task details
+│   │   ├── TaskListScreen/
+│   │   │   ├── TaskListScreen.tsx # Screen for displaying task list
+│   │   │   └── TaskItem.tsx # Displays individual task item in list
+│   └── index.tsx # Entry point for the app
+├── assets/ # App assets (e.g., images, fonts)
+├── components/ # Reusable components
+│   ├── ThemedText.tsx # Custom themed text component
+│   ├── ThemedView.tsx # Custom themed view component
+│   └── **tests**/ # Unit tests for components
+├── constants/ # App constants (e.g., colors, screen names)
+│   ├── colors.ts # Color definitions for the app
+│   └── screenNames.ts # Names of app screens
+├── context/ # Context for managing global state
+│   └── TaskContext.tsx # Provides task-related state
+├── hooks/ # Custom hooks for app functionality
+│   ├── useColorScheme.ts # Manages the app's color scheme
+│   ├── useColorScheme.web.ts # Web-specific color scheme hook
+│   ├── usePersistState.ts # Custom hook for persistent state
+│   ├── useTasksLogic.ts # Logic for managing tasks
+│   └── useThemeColor.ts # Custom hook for theme color management
+├── ios/ # iOS-specific code (if any)
+├── node_modules/ # Project dependencies
+├── scripts/ # Utility and build scripts
+├── types/ # TypeScript types
+│   ├── navigation.ts # Navigation-related types
+│   └── taskLogicTypes.ts # Task-related logic types
+├── utils/ # Utility functions
+│   ├── asyncStorage.ts # Functions for managing async storage
+│   └── mappers.ts # Functions for mapping data (tasks, todos)
+├── .eslintrc # ESLint configuration
+├── .gitignore # Git ignore configuration
+├── .prettierrc # Prettier configuration
+├── app.json # Expo configuration file
+└── eslint.config.js # Additional ESLint configuration
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+![alt text](image-1.png)

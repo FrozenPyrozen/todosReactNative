@@ -1,14 +1,14 @@
+import { useNavigation, useRoute } from '@react-navigation/core';
+import { RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useMemo } from 'react';
 import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation, useRoute } from '@react-navigation/core';
-import { RouteProp } from '@react-navigation/native';
 
-import { RootStackParamList } from '@/types/navigation';
-import { ThemedText } from '@/components/atoms/ThemedText';
-import { ThemedView } from '@/components/atoms/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { useTaskContext } from '@/context/TaskContext';
+import { RootStackParamList } from '@/types/navigation';
 
 const TaskDetailsScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList>>();
@@ -45,7 +45,6 @@ const TaskDetailsScreen: React.FC = () => {
     <Container>
       <TitleText type="title">{task.title}</TitleText>
       <StatusText>{task.completed ? 'Completed' : 'Incomplete'}</StatusText>
-
       <ButtonsContainer>
         <Button completed={task.completed} onPress={toggleCompletion}>
           <ButtonText>

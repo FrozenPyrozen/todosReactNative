@@ -3,18 +3,18 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { TaskProvider } from '@/context/TaskContext';
-import TaskListScreen from '@/app/screens/TaskListScreen';
-import TaskDetailsScreen from '@/app/screens/TaskDetailsScreen';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import TaskDetailsScreen from '@/app/screens/TaskDetailsScreen/TaskDetailsScreen';
+import TaskListScreen from '@/app/screens/TaskListScreen/TaskListScreen';
 import { SCREEN_NAMES } from '@/constants/screenNames';
+import { TaskProvider } from '@/context/TaskContext';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { RootStackParamList } from '@/types/navigation';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.

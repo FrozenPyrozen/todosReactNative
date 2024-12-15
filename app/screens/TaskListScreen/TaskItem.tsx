@@ -1,9 +1,9 @@
-import React from 'react';
-import styled from 'styled-components/native';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { Task } from '@/types/taskLogicTypes';
 import Icons from '@expo/vector-icons/Fontisto';
-import { ThemedText } from '@/components/atoms/ThemedText';
-import { ThemedView } from '@/components/atoms/ThemedView';
+import React from 'react';
+import styled from 'styled-components/native';
 
 export type TaskItemProps = {
   task: Task;

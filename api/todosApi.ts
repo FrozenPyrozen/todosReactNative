@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { Todo, TodoListResponse } from '@/types/taskLogicTypes';
+import axios from 'axios';
 
 const ENDPOINT = 'https://dummyjson.com/todos';
 

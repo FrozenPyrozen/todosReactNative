@@ -1,17 +1,17 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { TextInput, StyleSheet, Pressable } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/core';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
+import TaskItem from '@/app/screens/TaskListScreen/TaskItem';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { SCREEN_NAMES } from '@/constants/screenNames';
 import { useTaskContext } from '@/context/TaskContext';
-import TaskItem from '@/components/molecules/TaskItem/TaskItem';
+import { RootStackParamList } from '@/types/navigation';
 import { Task } from '@/types/taskLogicTypes';
 import { FlashList } from '@shopify/flash-list';
-import { ThemedView } from '@/components/atoms/ThemedView';
-import { ThemedText } from '@/components/atoms/ThemedText';
-import { SCREEN_NAMES } from '@/constants/screenNames';
-import { RootStackParamList } from '@/types/navigation';
 
 const EmptyComponent = () => (
   <EmptyContainer>
@@ -24,12 +24,14 @@ export type AddTaskInputProps = {
   onChangeText: (text: string) => void;
 };
 
-export const AddTaskInput = ({ value, onChangeText }: AddTaskInputProps) => (
-  <StyledTextInput
-    placeholder="Add a new task"
-    value={value}
-    onChangeText={onChangeText}
-  />
+const AddTaskInput: React.FC<AddTaskInputProps> = React.memo(
+  ({ value, onChangeText }) => (
+    <StyledTextInput
+      placeholder="Add a new task"
+      value={value}
+      onChangeText={onChangeText}
+    />
+  )
 );
 
 export type AddTaskBtnProps = {
@@ -37,10 +39,12 @@ export type AddTaskBtnProps = {
   onPress: () => void;
 };
 
-export const AddTaskBtn = ({ text, onPress }: AddTaskBtnProps) => (
-  <AddButton onPress={onPress}>
-    <AddButtonText>{text}</AddButtonText>
-  </AddButton>
+const AddTaskBtn: React.FC<AddTaskBtnProps> = React.memo(
+  ({ text, onPress }) => (
+    <AddButton onPress={onPress}>
+      <AddButtonText>{text}</AddButtonText>
+    </AddButton>
+  )
 );
 
 const TaskListScreen: React.FC = () => {

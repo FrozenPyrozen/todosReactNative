@@ -36,7 +36,7 @@ const taskReducer = (state: AppState, action: TaskAction): AppState => {
     case TASK_REDUCER_ACTION_TYPES.ADD_TASK:
       return {
         ...state,
-        tasks: [...state.tasks, action.payload],
+        tasks: [action.payload, ...state.tasks],
         loading: { ...state.loading, addTask: false },
         errors: { ...state.errors, addTask: null },
       };

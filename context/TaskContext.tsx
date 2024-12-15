@@ -2,13 +2,18 @@ import { TASK_REDUCER_TYPES } from '@/constants/taskReducer';
 import { TaskContextType, Task, AppState } from '@/types/taskLogicTypes';
 import React, {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
   useReducer,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addTodo, fetchTodos, updateTodo, deleteTodo } from '@/api/todosApi';
+import {
+  makeTaskCreatedByUserLocally,
+  mapTodoToTask,
+  mapTodosToTasks,
+} from '@/utils/mappers';
 
 const STORAGE_KEY = 'localTasksState';
 
@@ -36,6 +41,20 @@ export type TaskProviderProps = { children: React.ReactNode };
 
 const initialState: AppState = {
   tasks: [],
+  loading: {
+    fetchTasks: false,
+    addTask: false,
+    toggleTask: false,
+    deleteTask: false,
+    setTasksFromStorage: false,
+  },
+  errors: {
+    fetchTasks: null,
+    addTask: null,
+    toggleTask: null,
+    deleteTask: null,
+    setTasksFromStorage: null,
+  },
 };
 
 const taskReducer = (
@@ -46,10 +65,9 @@ const taskReducer = (
     case TASK_REDUCER_TYPES.ADD_TASK:
       return {
         ...state,
-        tasks: [
-          ...state.tasks,
-          { id: Date.now(), title: action.payload, completed: false },
-        ],
+        tasks: [...state.tasks, action.payload],
+        loading: { ...state.loading, addTask: false },
+        errors: { ...state.errors, addTask: null },
       };
     case TASK_REDUCER_TYPES.TOGGLE_TASK_COMPLETION:
       return {
@@ -59,16 +77,40 @@ const taskReducer = (
             ? { ...task, completed: !task.completed }
             : task
         ),
+        loading: { ...state.loading, toggleTask: false },
+        errors: { ...state.errors, toggleTask: null },
       };
     case TASK_REDUCER_TYPES.DELETE_TASK:
       return {
         ...state,
         tasks: state.tasks.filter((task) => task.id !== action.payload),
+        loading: { ...state.loading, deleteTask: false },
+        errors: { ...state.errors, deleteTask: null },
       };
     case TASK_REDUCER_TYPES.SET_STATE_FROM_STORAGE:
       return {
         ...state,
         ...action.payload,
+        loading: { ...state.loading, setTasksFromStorage: false },
+        errors: { ...state.errors, setTasksFromStorage: null },
+      };
+    case TASK_REDUCER_TYPES.FETCH_TASKS:
+      return {
+        ...state,
+        tasks: [...action.payload],
+        loading: { ...state.loading, fetchTasks: false },
+        errors: { ...state.errors, fetchTasks: null },
+      };
+    case TASK_REDUCER_TYPES.SET_LOADING:
+      return {
+        ...state,
+        loading: { ...state.loading, [action.payload]: true },
+      };
+    case TASK_REDUCER_TYPES.SET_ERROR:
+      return {
+        ...state,
+        errors: { ...state.errors, [action.payload.key]: action.payload.error },
+        loading: { ...state.loading, [action.payload.key]: false },
       };
     default:
       return state;
@@ -81,17 +123,21 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadState = async () => {
       const storedState = await getStoreState();
-      if (storedState) {
+      if (storedState && storedState.tasks.length > 0) {
         dispatch({
           type: TASK_REDUCER_TYPES.SET_STATE_FROM_STORAGE,
           payload: storedState,
         });
+      } else {
+        // Dummy api didn't add, edit, or remove task so it would refresh all tasks
+        fetchTasks();
       }
     };
     loadState();
   }, []);
 
   useEffect(() => {
+    // Save the state to AsyncStorage whenever tasks change
     const saveState = async () => {
       if (!state) {
         return;
@@ -101,23 +147,135 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     saveState();
   }, [state]);
 
-  const addTask = useCallback((title: string) => {
-    dispatch({ type: TASK_REDUCER_TYPES.ADD_TASK, payload: title });
-  }, []);
+  // Tasks logic handling
+  const fetchTasks = async () => {
+    try {
+      dispatch({ type: TASK_REDUCER_TYPES.SET_LOADING, payload: 'fetchTasks' });
+      const result = await fetchTodos();
+      const mappedTasks = mapTodosToTasks(result.todos);
 
-  const toggleTaskCompletion = useCallback((id: Task['id']) => {
-    dispatch({ type: TASK_REDUCER_TYPES.TOGGLE_TASK_COMPLETION, payload: id });
-  }, []);
+      dispatch({ type: TASK_REDUCER_TYPES.FETCH_TASKS, payload: mappedTasks });
+    } catch (error) {
+      dispatch({
+        type: TASK_REDUCER_TYPES.SET_ERROR,
+        payload: { key: 'fetchTasks', error },
+      });
+    }
+  };
 
-  const deleteTask = useCallback((id: Task['id']) => {
-    dispatch({ type: TASK_REDUCER_TYPES.DELETE_TASK, payload: id });
-  }, []);
+  const addTask = async (title: Task['title']) => {
+    try {
+      // Dummy api didn't save task on server, and returns 255 id all time
+      dispatch({ type: TASK_REDUCER_TYPES.SET_LOADING, payload: 'addTask' });
+      const todo = await addTodo({
+        todo: title,
+        completed: false,
+        // mock userId
+        userId: 1,
+      });
+      const newTask = makeTaskCreatedByUserLocally(
+        mapTodoToTask({ ...todo, id: Date.now() + Math.random() })
+      );
+      dispatch({ type: TASK_REDUCER_TYPES.ADD_TASK, payload: newTask });
+    } catch (error) {
+      dispatch({
+        type: TASK_REDUCER_TYPES.SET_ERROR,
+        payload: { key: 'addTask', error },
+      });
+    }
+  };
+
+  const toggleTaskCompletion = async (id: Task['id']) => {
+    try {
+      dispatch({ type: TASK_REDUCER_TYPES.SET_LOADING, payload: 'toggleTask' });
+      const taskThatNeedToBeUpdated = state.tasks.find(
+        (task) => task.id === id
+      );
+      if (!taskThatNeedToBeUpdated) {
+        return dispatch({
+          type: TASK_REDUCER_TYPES.SET_ERROR,
+          payload: {
+            key: 'toggleTask',
+            error: `Task with id:${id} is not found!`,
+          },
+        });
+      }
+      const todoUpdates = {
+        completed: !taskThatNeedToBeUpdated.completed,
+      };
+      // Dummy api didn't edit task on server, so we didn't send locally created task, because it would get an error
+      let updatedTask = null;
+      if (!taskThatNeedToBeUpdated.isCreatedByUserLocally) {
+        const updatedTodo = await updateTodo(id, todoUpdates);
+        updatedTask = mapTodoToTask(updatedTodo);
+      } else {
+        // We didn't toggle the completed status here, because we handle it on reducer, cause of dummy api
+        updatedTask = taskThatNeedToBeUpdated;
+      }
+      dispatch({
+        type: TASK_REDUCER_TYPES.TOGGLE_TASK_COMPLETION,
+        payload: updatedTask.id,
+      });
+    } catch (error) {
+      dispatch({
+        type: TASK_REDUCER_TYPES.SET_ERROR,
+        payload: { key: 'toggleTask', error },
+      });
+    }
+  };
+
+  const deleteTask = async (id: Task['id']) => {
+    try {
+      dispatch({ type: TASK_REDUCER_TYPES.SET_LOADING, payload: 'deleteTask' });
+      // Dummy api didn't delete task on server, so we didn't send locally deleted task, because it would get an error
+      const taskThatNeedToBeDeleted = state.tasks.find(
+        (task) => task.id === id
+      );
+      if (!taskThatNeedToBeDeleted) {
+        return dispatch({
+          type: TASK_REDUCER_TYPES.SET_ERROR,
+          payload: {
+            key: 'deleteTask',
+            error: `Task with id:${id} is not found!`,
+          },
+        });
+      }
+      let deletedTask = null;
+      if (!taskThatNeedToBeDeleted.isCreatedByUserLocally) {
+        const result = await deleteTodo(id);
+        deletedTask = mapTodoToTask(result);
+      } else {
+        deletedTask = taskThatNeedToBeDeleted;
+      }
+
+      dispatch({
+        type: TASK_REDUCER_TYPES.DELETE_TASK,
+        payload: deletedTask.id,
+      });
+    } catch (error) {
+      dispatch({
+        type: TASK_REDUCER_TYPES.SET_ERROR,
+        payload: { key: 'deleteTask', error },
+      });
+    }
+  };
 
   const tasks = useMemo(() => state.tasks, [state.tasks]);
+  const isFetchTasksLoading = useMemo(
+    () => state.loading.fetchTasks,
+    [state.loading.fetchTasks]
+  );
 
   return (
     <TaskContext.Provider
-      value={{ tasks, addTask, toggleTaskCompletion, deleteTask }}
+      value={{
+        tasks,
+        isFetchTasksLoading,
+        fetchTasks,
+        addTask,
+        toggleTaskCompletion,
+        deleteTask,
+      }}
     >
       {children}
     </TaskContext.Provider>

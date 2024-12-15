@@ -1,20 +1,25 @@
+import React, { useCallback, useMemo } from 'react';
+import { Pressable } from 'react-native';
+import styled from 'styled-components/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation, useRoute } from '@react-navigation/core';
+import { RouteProp } from '@react-navigation/native';
+
+import { RootStackParamList } from '@/types/navigation';
 import { ThemedText } from '@/components/atoms/ThemedText';
 import { ThemedView } from '@/components/atoms/ThemedView';
 import { useTaskContext } from '@/context/TaskContext';
-import { useRoute } from '@react-navigation/native';
-import { useNavigation } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
 
 const TaskDetailsScreen: React.FC = () => {
-  const route = useRoute();
-  const navigation = useNavigation();
-  const { taskId } = route.params;
+  const route = useRoute<RouteProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const routeParams = route.params;
   const { tasks, deleteTask, toggleTaskCompletion } = useTaskContext();
 
   const task = useMemo(
-    () => tasks.find((t) => t.id === taskId),
-    [tasks, taskId]
+    () => tasks.find((t) => t.id === routeParams?.taskId),
+    [tasks, routeParams?.taskId]
   );
 
   const toggleCompletion = useCallback(() => {
@@ -33,85 +38,80 @@ const TaskDetailsScreen: React.FC = () => {
   }, [task, deleteTask, navigation]);
 
   if (!task) {
-    return <ThemedText style={styles.errorText}>Task not found!</ThemedText>;
+    return <ErrorText>Task not found!</ErrorText>;
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.titleText}>
-        {task.title}
-      </ThemedText>
-      <ThemedText style={styles.statusText}>
-        {task.completed ? 'Completed' : 'Incomplete'}
-      </ThemedText>
+    <Container>
+      <TitleText type="title">{task.title}</TitleText>
+      <StatusText>{task.completed ? 'Completed' : 'Incomplete'}</StatusText>
 
-      <ThemedView style={styles.buttonsContainer}>
-        <Pressable
-          style={[styles.button, task.completed && styles.incompleteButton]}
-          onPress={toggleCompletion}
-        >
-          <ThemedText style={styles.buttonText}>
+      <ButtonsContainer>
+        <Button completed={task.completed} onPress={toggleCompletion}>
+          <ButtonText>
             {task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
-          </ThemedText>
-        </Pressable>
+          </ButtonText>
+        </Button>
 
-        <Pressable style={styles.deleteButton} onPress={removeTask}>
-          <ThemedText style={styles.buttonText}>Delete Task</ThemedText>
-        </Pressable>
-      </ThemedView>
-    </ThemedView>
+        <DeleteButton onPress={removeTask}>
+          <ButtonText>Delete Task</ButtonText>
+        </DeleteButton>
+      </ButtonsContainer>
+    </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  titleText: {
-    fontSize: 24,
-    marginBottom: 16,
-    fontWeight: 'bold',
-  },
-  statusText: {
-    fontSize: 18,
-    marginBottom: 24,
-    color: 'gray',
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  buttonsContainer: {
-    width: '100%',
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
-  button: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    marginBottom: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  incompleteButton: {
-    backgroundColor: '#FF9800',
-  },
-  deleteButton: {
-    backgroundColor: 'red',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-});
-
 export default TaskDetailsScreen;
+
+const Container = styled(ThemedView)`
+  flex: 1;
+  padding: 16px;
+  justify-content: center;
+  align-items: center;
+`;
+
+const TitleText = styled(ThemedText)`
+  font-size: 24px;
+  margin-bottom: 16px;
+  font-weight: bold;
+`;
+
+const StatusText = styled(ThemedText)`
+  font-size: 18px;
+  margin-bottom: 24px;
+  color: gray;
+`;
+
+const ErrorText = styled(ThemedText)`
+  font-size: 18px;
+  color: red;
+  text-align: center;
+  margin-top: 20px;
+`;
+
+const ButtonsContainer = styled(ThemedView)`
+  width: 100%;
+  padding: 0 20px;
+  margin-top: 20px;
+`;
+
+const Button = styled(Pressable)<{ completed: boolean }>`
+  background-color: ${({ completed }) => (completed ? '#FF9800' : '#4CAF50')};
+  padding: 12px 0;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  align-items: center;
+`;
+
+const DeleteButton = styled(Pressable)`
+  background-color: red;
+  padding: 12px 0;
+  border-radius: 8px;
+  align-items: center;
+`;
+
+const ButtonText = styled(ThemedText)`
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+`;

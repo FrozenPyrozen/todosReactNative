@@ -1,5 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { TextInput, TextInputProps, StyleSheet, Pressable } from 'react-native';
+import { TextInput, StyleSheet, Pressable } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/core';
+import styled from 'styled-components/native';
+
 import { useTaskContext } from '@/context/TaskContext';
 import TaskItem from '@/components/molecules/TaskItem/TaskItem';
 import { Task } from '@/types/taskLogicTypes';
@@ -7,11 +11,12 @@ import { FlashList } from '@shopify/flash-list';
 import { ThemedView } from '@/components/atoms/ThemedView';
 import { ThemedText } from '@/components/atoms/ThemedText';
 import { SCREEN_NAMES } from '@/constants/screenNames';
+import { RootStackParamList } from '@/types/navigation';
 
 const EmptyComponent = () => (
-  <ThemedView style={styles.empty}>
-    <ThemedText>"No tasks yet"</ThemedText>
-  </ThemedView>
+  <EmptyContainer>
+    <EmptyText>"No tasks yet"</EmptyText>
+  </EmptyContainer>
 );
 
 export type AddTaskInputProps = {
@@ -20,11 +25,10 @@ export type AddTaskInputProps = {
 };
 
 export const AddTaskInput = ({ value, onChangeText }: AddTaskInputProps) => (
-  <TextInput
+  <StyledTextInput
     placeholder="Add a new task"
     value={value}
     onChangeText={onChangeText}
-    style={styles.input}
   />
 );
 
@@ -34,14 +38,27 @@ export type AddTaskBtnProps = {
 };
 
 export const AddTaskBtn = ({ text, onPress }: AddTaskBtnProps) => (
-  <Pressable onPress={onPress} style={styles.addBtn}>
-    <ThemedText style={styles.addBtnText}>{text}</ThemedText>
-  </Pressable>
+  <AddButton onPress={onPress}>
+    <AddButtonText>{text}</AddButtonText>
+  </AddButton>
 );
 
-const TaskListScreen: React.FC = ({ navigation }: any) => {
-  const { tasks, addTask, toggleTaskCompletion, deleteTask } = useTaskContext();
+const TaskListScreen: React.FC = () => {
+  const {
+    tasks,
+    isFetchTasksLoading,
+    addTask,
+    toggleTaskCompletion,
+    deleteTask,
+    fetchTasks,
+  } = useTaskContext();
   const [taskTitle, setTaskTitle] = useState('');
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const refreshTasks = useCallback(() => {
+    fetchTasks();
+  }, []);
 
   const handleAddTask = useCallback(() => {
     if (taskTitle.trim()) {
@@ -77,7 +94,7 @@ const TaskListScreen: React.FC = ({ navigation }: any) => {
   const memoizedTasks = useMemo(() => tasks, [tasks]);
 
   return (
-    <ThemedView style={styles.container}>
+    <Container>
       <AddTaskInput value={taskTitle} onChangeText={handleChangeTitle} />
       <AddTaskBtn text="Add" onPress={handleAddTask} />
       <FlashList
@@ -86,40 +103,49 @@ const TaskListScreen: React.FC = ({ navigation }: any) => {
         renderItem={renderTaskItem}
         estimatedItemSize={70}
         ListEmptyComponent={EmptyComponent}
+        onRefresh={refreshTasks}
+        refreshing={isFetchTasksLoading}
       />
-    </ThemedView>
+    </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f7f7f7',
-  },
-  input: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 10,
-    backgroundColor: 'white',
-  },
-  empty: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  addBtn: {
-    backgroundColor: 'green',
-    padding: 5,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  addBtnText: {
-    textAlign: 'center',
-    color: 'white',
-    fontWeight: 'bold',
-  },
-});
+const Container = styled(ThemedView)`
+  flex: 1;
+  padding: 16px;
+  background-color: #f7f7f7;
+`;
+
+const StyledTextInput = styled.TextInput`
+  padding: 10px;
+  border-width: 1px;
+  border-color: #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: white;
+`;
+
+const EmptyContainer = styled(ThemedView)`
+  margin-top: 20px;
+  align-items: center;
+`;
+
+const EmptyText = styled(ThemedText)`
+  font-size: 16px;
+  color: gray;
+`;
+
+const AddButton = styled(Pressable)`
+  background-color: green;
+  padding: 5px;
+  border-radius: 5px;
+  margin-horizontal: 5px;
+`;
+
+const AddButtonText = styled(ThemedText)`
+  text-align: center;
+  color: white;
+  font-weight: bold;
+`;
 
 export default TaskListScreen;

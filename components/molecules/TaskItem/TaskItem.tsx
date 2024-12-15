@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Pressable } from 'react-native';
+import styled from 'styled-components/native';
 import { Task } from '@/types/taskLogicTypes';
 import Icons from '@expo/vector-icons/Fontisto';
 import { ThemedText } from '@/components/atoms/ThemedText';
@@ -19,71 +19,77 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onPress,
 }) => {
   return (
-    <ThemedView style={styles.container}>
-      <Pressable onPress={onToggleCompletion} style={styles.checkBox}>
+    <Container>
+      <CheckBox onPress={onToggleCompletion}>
         {task.completed ? (
           <Icons name="checkbox-active" size={16} color="black" />
         ) : (
           <Icons name="checkbox-passive" size={16} color="black" />
         )}
-      </Pressable>
-      <Pressable onPress={onPress} style={styles.titleContainer}>
-        <ThemedText
+      </CheckBox>
+      <TitleContainer onPress={onToggleCompletion}>
+        <TitleText
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={task.completed && styles.completed}
+          completed={task.completed}
         >
           {task.title}
-        </ThemedText>
-      </Pressable>
-      <Pressable onPress={onPress} style={styles.detailsButton}>
-        <ThemedText style={styles.detailsText}>Details</ThemedText>
-      </Pressable>
-      <Pressable onPress={onDelete} style={styles.deleteButton}>
-        <ThemedText style={styles.deleteText}>Delete</ThemedText>
-      </Pressable>
-    </ThemedView>
+        </TitleText>
+      </TitleContainer>
+      <DetailsButton onPress={onPress}>
+        <DetailsButtonText>Details</DetailsButtonText>
+      </DetailsButton>
+      <DeleteButton onPress={onDelete}>
+        <DeleteButtonText>Delete</DeleteButtonText>
+      </DeleteButton>
+    </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    backgroundColor: '#fff',
-  },
-  checkBox: {
-    marginRight: 10,
-  },
-  completed: {
-    textDecorationLine: 'line-through',
-    color: 'gray',
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  detailsButton: {
-    backgroundColor: 'blue',
-    padding: 5,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  detailsText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  deleteButton: {
-    backgroundColor: 'red',
-    padding: 5,
-    borderRadius: 5,
-  },
-  deleteText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-});
-
 export default React.memo(TaskItem);
+
+const Container = styled(ThemedView)`
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+  border-bottom-width: 1px;
+  border-color: #eee;
+  background-color: #fff;
+`;
+
+const CheckBox = styled.Pressable`
+  margin-right: 10px;
+`;
+
+const TitleContainer = styled.Pressable`
+  flex: 1;
+`;
+
+const TitleText = styled(ThemedText)<{ completed: boolean }>`
+  text-decoration-line: ${({ completed }) =>
+    completed ? 'line-through' : 'none'};
+  color: ${({ completed }) => (completed ? 'gray' : 'black')};
+`;
+
+const DetailsButton = styled.Pressable`
+  background-color: blue;
+  padding: 5px;
+  border-radius: 5px;
+  margin-horizontal: 5px;
+`;
+
+const DetailsButtonText = styled(ThemedText)`
+  color: white;
+  font-weight: bold;
+`;
+
+const DeleteButton = styled.Pressable`
+  background-color: red;
+  padding: 5px;
+  border-radius: 5px;
+`;
+
+const DeleteButtonText = styled(ThemedText)`
+  color: white;
+  font-weight: bold;
+`;

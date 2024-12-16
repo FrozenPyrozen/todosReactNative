@@ -45,48 +45,8 @@ This command will move the starter code to the **app-example** directory and cre
 
 ## Project structure
 
-todosReactNative/
-├── .expo # Expo configuration
-├── .vscode # VSCode settings
-├── api/ # API functions and data fetching
-│   └── todosApi.ts # Handles API calls related to todos
-├── app/ # Main application code
-│   ├── screens/ # React Native Screens
-│   │   ├── TaskDetailsScreen/
-│   │   │   └── TaskDetailsScreen.tsx # Screen for displaying task details
-│   │   ├── TaskListScreen/
-│   │   │   ├── TaskListScreen.tsx # Screen for displaying task list
-│   │   │   └── TaskItem.tsx # Displays individual task item in list
-│   └── index.tsx # Entry point for the app
-├── assets/ # App assets (e.g., images, fonts)
-├── components/ # Reusable components
-│   ├── ThemedText.tsx # Custom themed text component
-│   ├── ThemedView.tsx # Custom themed view component
-│   └── **tests**/ # Unit tests for components
-├── constants/ # App constants (e.g., colors, screen names)
-│   ├── colors.ts # Color definitions for the app
-│   └── screenNames.ts # Names of app screens
-├── context/ # Context for managing global state
-│   └── TaskContext.tsx # Provides task-related state
-├── hooks/ # Custom hooks for app functionality
-│   ├── useColorScheme.ts # Manages the app's color scheme
-│   ├── useColorScheme.web.ts # Web-specific color scheme hook
-│   ├── usePersistState.ts # Custom hook for persistent state
-│   ├── useTasksLogic.ts # Logic for managing tasks
-│   └── useThemeColor.ts # Custom hook for theme color management
-├── ios/ # iOS-specific code (if any)
-├── node_modules/ # Project dependencies
-├── scripts/ # Utility and build scripts
-├── types/ # TypeScript types
-│   ├── navigation.ts # Navigation-related types
-│   └── taskLogicTypes.ts # Task-related logic types
-├── utils/ # Utility functions
-│   ├── asyncStorage.ts # Functions for managing async storage
-│   └── mappers.ts # Functions for mapping data (tasks, todos)
-├── .eslintrc # ESLint configuration
-├── .gitignore # Git ignore configuration
-├── .prettierrc # Prettier configuration
-├── app.json # Expo configuration file
-└── eslint.config.js # Additional ESLint configuration
+![Project structure](image-1.png)
 
-![alt text](image-1.png)
+## Project quick review
+
+![Project quick review gif](project-quick-review.gif)
